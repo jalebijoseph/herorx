@@ -1,80 +1,36 @@
-//
-//  ContentView.swift
-//  HeroRx
-//
-//  Created by Scholar on 5/30/26.
-//
-
 import SwiftUI
-import SwiftData
 
 struct ContentView: View {
-    @Environment(\.modelContext) private var modelContext
-    @Query private var items: [Item]
-
     var body: some View {
-        NavigationViewWrapper {
-            List {
-                ForEach(items) { item in
-                    NavigationLink {
-                        Text("Item at \(item.timestamp, format: Date.FormatStyle(date: .numeric, time: .standard))")
-                    } label: {
-                        Text(item.timestamp, format: Date.FormatStyle(date: .numeric, time: .standard))
-                    }
+        TabView {
+            DashboardView()
+                .tabItem {
+                    Label("Dashboard", systemImage: "house")
                 }
-                .onDelete(perform: deleteItems)
-            }
-#if os(macOS)
-            .navigationSplitViewColumnWidth(min: 180, ideal: 200)
-#endif
-            .toolbar {
-#if os(iOS)
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    EditButton()
+
+            DiagnosesView()
+                .tabItem {
+                    Label("Conditions", systemImage: "heart.text.square")
                 }
-#endif
-                ToolbarItem {
-                    Button(action: addItem) {
-                        Label("Add Item", systemImage: "plus")
-                    }
+
+            MedicationView()
+                .tabItem {
+                    Label("Meds", systemImage: "pills")
                 }
-            }
+            AppointmentView()
+                .tabItem {
+                    Label("Appointments", systemImage: "calendar")
+                }
+            
+            Text("Care Team")
+                .tabItem {
+                    Label("Care Team", systemImage: "person.2")
+                }
+
+            Text("Emergency")
+                .tabItem {
+                    Label("Emergency", systemImage: "cross.case.fill")
+                }
         }
     }
-
-    private func addItem() {
-        withAnimation {
-            let newItem = Item(timestamp: Date())
-            modelContext.insert(newItem)
-        }
-    }
-
-    private func deleteItems(offsets: IndexSet) {
-        withAnimation {
-            for index in offsets {
-                modelContext.delete(items[index])
-            }
-        }
-    }
-}
-
-fileprivate struct NavigationViewWrapper<Content: View>: View {
-    let content: () -> Content
-
-    var body: some View {
-#if os(macOS)
-        NavigationSplitView {
-            content()
-        } detail: {
-            Text("Select an item")
-        }
-#else
-        content()
-#endif
-    }
-}
-
-#Preview {
-    ContentView()
-        .modelContainer(for: Item.self, inMemory: true)
 }
